@@ -1,1 +1,0 @@
-# biomed_service_delivery_cost_model
