@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 from budgetreport import BudgetReport
 
 # Show all df columns in run tool window
