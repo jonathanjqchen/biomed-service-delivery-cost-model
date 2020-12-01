@@ -198,7 +198,7 @@ class CostCentre:
 
         total_oh = self.non_labour_oh + self.regional_staff_oh + self.tech_staff_oh
 
-        return total_oh / annual_labour_hours
+        return total_oh / (0.8 * annual_labour_hours)
 
     def compute_weighted_avg_tech_hourly_wage(self):
 

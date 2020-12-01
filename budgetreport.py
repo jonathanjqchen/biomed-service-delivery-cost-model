@@ -110,20 +110,21 @@ class BudgetReport:
 
         '''
         Convert dataframe into dictionary...
-        Key: "asset_description"
-        Value: ["quantity", "health_auth", "site_code", "shop_code"]
+        Key: "df index"
+        Value: ["asset_description", "quantity", "health_auth", "site_code", "shop_code"]
         '''
-        assets_dict = df.set_index("asset_description").T.to_dict("list")
+        # assets_dict = df.set_index("asset_description").T.to_dict("list")
+        assets_dict = df.T.to_dict("list")
 
         assets = []
 
         # Iterate through dictionary, create Asset object for each entry, and append to assets list
         for asset, details in assets_dict.items():
-            assets.append(Asset(asset,  # asset_description
-                                details[0],  # quantity
-                                details[1],  # health_auth
-                                details[2],  # site_code
-                                details[3],  # shop_code
+            assets.append(Asset(details[0],  # asset_description
+                                details[1],  # quantity
+                                details[2],  # health_auth
+                                details[3],  # site_code
+                                details[4],  # shop_code
                                 self.sites_cost_centre_dict))
 
         return assets
