@@ -7,7 +7,7 @@ class Asset:
 
     budget_report_input_file_path = "model_inputs/budget_report_input.xlsx"  # Path to budget report input file
 
-    def __init__(self, name, qty, health_auth, site_code, shop_code, sites_cc_dict):
+    def __init__(self, model_num, name, qty, health_auth, site_code, shop_code, sites_cc_dict):
         """
         Initializes instance variables, calls strip() on strings to make sure there are no white spaces at the front or
         end when importing data from Excel
@@ -18,6 +18,7 @@ class Asset:
         :param shop_code: Shop code, for determining the function (clinical, renal imaging) of a device
         :param sites_cc_dict: Dictionary reference that shows corresponding cost centres for a given site
         """
+        self.model_num = model_num.strip()
         self.name = name.strip()
         self.qty = qty
         self.health_auth = health_auth.strip()

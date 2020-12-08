@@ -58,8 +58,8 @@ def read_hours_per_day():
 
 def read_tech_staff_salary_sched():
 
-    # Read "Tech Staff Salary Schedule" into dataframe, use year6_hourly_wage
-    tech_staff_salary_df = pd.read_excel(staff_salaries_file_path, sheet_name="Tech Staff Salary Schedule")
+    # Read "Tech Staff Salary Sched" into dataframe, use year6_hourly_wage
+    tech_staff_salary_df = pd.read_excel(staff_salaries_file_path, sheet_name="Tech Staff Salary Sched")
     tech_staff_salary_dict = tech_staff_salary_df.set_index("level")["year6_hourly_wage"].to_dict()
 
     return tech_staff_salary_dict

@@ -78,25 +78,8 @@ class BudgetReport:
         Initialize instance variables
         """
 
-        # self.recompute_oh = self.assign_recompute_oh()
         # Dictionary with key: "cost centre string" and value: CostCentre object
         self.cost_centres = {}
-
-    # def assign_recompute_oh(self):
-    #     """
-    #     Pulls corresponding cell values in budget report input file to determine if user has updated financial reports
-    #     or labour reports
-    #     :return: Boolean indicating whether or not OH should be recomputed
-    #     """
-    #
-    #     # Read user responses into a dataframe
-    #     df = pd.read_excel(self.budget_report_input_file_path, header=None, usecols="A:B")
-    #
-    #     # If either the financial reports or labour reports have been updated, then rerun OH computation, else don't
-    #     if df.at[0, 1].lower() == "y" or df.at[1, 1].lower() == "y":
-    #         return True
-    #     else:
-    #         return False
 
     def create_asset_objects(self):
         """
@@ -111,7 +94,7 @@ class BudgetReport:
         '''
         Convert dataframe into dictionary...
         Key: "df index"
-        Value: ["asset_description", "quantity", "health_auth", "site_code", "shop_code"]
+        Value: ["model_num", "asset_description", "quantity", "health_auth", "site_code", "shop_code"]
         '''
         # assets_dict = df.set_index("asset_description").T.to_dict("list")
         assets_dict = df.T.to_dict("list")
@@ -120,11 +103,12 @@ class BudgetReport:
 
         # Iterate through dictionary, create Asset object for each entry, and append to assets list
         for asset, details in assets_dict.items():
-            assets.append(Asset(details[0],  # asset_description
-                                details[1],  # quantity
-                                details[2],  # health_auth
-                                details[3],  # site_code
-                                details[4],  # shop_code
+            assets.append(Asset(details[0],  # model_num
+                                details[1],  # asset_description
+                                details[2],  # quantity
+                                details[3],  # health_auth
+                                details[4],  # site_code
+                                details[5],  # shop_code
                                 self.sites_cost_centre_dict))
 
         return assets
@@ -195,16 +179,23 @@ class BudgetReport:
             cost_centre = self.cost_centres.get(key)
             asset_objects = cost_centre.assets
             for asset in asset_objects:
-                # Create df with rows containing current asset only
-                filtered_asset_df = asset_support_hours_df[asset_support_hours_df["asset_description"] == asset.name]
-                # Group df by model number and summarize by average support hour and count of that model
-                asset_model_num_df = filtered_asset_df.set_index("model_number").groupby("model_number").agg(
-                    {"avg_support_hour_per_model": "mean", "count_asset": "sum"})
-                # Product portion of weighted average computation
-                asset_model_num_df["weight"] = asset_model_num_df["avg_support_hour_per_model"] * (
-                            asset_model_num_df["count_asset"] / asset_model_num_df["count_asset"].sum())
-                # Compute weighted average support hours for current asset
-                asset.avg_support_hours = asset_model_num_df["weight"].sum()
+                # Create df with rows that only contain model # of current asset
+                filtered_model_df = asset_support_hours_df[asset_support_hours_df["model_number"] == asset.model_num]
+                # If model number exists in asset_support_hours_reference.xlsx, compute average support hours for current model
+                if not filtered_model_df.empty:
+                    asset.avg_support_hours = filtered_model_df["avg_support_hour_per_model"].mean()
+                # If model number doesn't exist in asset_support_hours_reference.xlsx, compute weighted average support hours for current asset
+                else:
+                    # Create df with rows that only contain the asset_description of current asset
+                    filtered_asset_df = asset_support_hours_df[asset_support_hours_df["asset_description"] == asset.name]
+                    # Group df by model number and summarize by average support hour and count of that model
+                    asset_model_num_df = filtered_asset_df.set_index("model_number").groupby("model_number").agg(
+                        {"avg_support_hour_per_model": "mean", "count_asset": "sum"})
+                    # Product portion of weighted average computation
+                    asset_model_num_df["weight"] = asset_model_num_df["avg_support_hour_per_model"] * (
+                                asset_model_num_df["count_asset"] / asset_model_num_df["count_asset"].sum())
+                    # Compute weighted average support hours for current asset
+                    asset.avg_support_hours = asset_model_num_df["weight"].sum()
 
     def write_output_to_excel(self):
 
@@ -214,13 +205,13 @@ class BudgetReport:
         workbook = xlsxwriter.Workbook(budget_output_file_path)
 
         # Formatting
-        sheet_title = workbook.add_format({"bold": True})
+        title = workbook.add_format({"bold": True})
         heading = workbook.add_format({"bold": True, "font_color": "white", "bg_color": "#244062", "border": True})
         cell_borders = workbook.add_format({"border": True})
         cell_borders_and_currency = workbook.add_format({"border": True, "num_format": "$#,##0.00"})
         currency = workbook.add_format({"num_format": "$#,##0.00"})
         decimal_hundredth = workbook.add_format({"num_format": "#,##0.00"})
-        total_cost_to_service = workbook.add_format({"font_color": "white", "bg_color": "#6699CC"})
+        total_cost_to_service = workbook.add_format({"font_color": "white", "bg_color": "#538dd5"})
 
         # One worksheet per cost centre
         for key in self.cost_centres:
@@ -230,39 +221,52 @@ class BudgetReport:
             # Title
             worksheet.write("A1",
                             "{name}: Annual Service Delivery Costs for Net New Equipment".format(name=cost_centre.name),
-                            sheet_title)
+                            title)
 
             # OH output
+            worksheet.write("A3", "OH Information", title)
 
             total_oh = cost_centre.regional_staff_oh + cost_centre.tech_staff_oh + cost_centre.non_labour_oh
 
-            oh_headers = ["POHR", "Total OH", "Non-labour OH", "Tech Staff OH", "Regional Staff OH"]
-            oh_values = [cost_centre.pohr,
-                         total_oh,
+            oh_headers = ["Total OH", "Non-labour OH", "Tech Staff OH", "Regional Staff OH"]
+            oh_values = [total_oh,
                          cost_centre.non_labour_oh,
                          cost_centre.tech_staff_oh,
                          cost_centre.regional_staff_oh]
 
-            oh_row = 2
+            oh_row = 3
             oh_header_col = 0
             oh_values_col = 1
 
             worksheet.write_column(oh_row, oh_header_col, oh_headers, heading)
             worksheet.write_column(oh_row, oh_values_col, oh_values, cell_borders_and_currency)
 
-            # Asset output
+            # Rates output
+            worksheet.write("A9", "Rates", title)
 
+            rates_headers = ["POHR", "Tech $/hr"]
+            rates_values = [cost_centre.pohr,
+                            cost_centre.weighted_avg_tech_hourly_wage]
+
+            oh_row = 9
+
+            worksheet.write_column(oh_row, oh_header_col, rates_headers, heading)
+            worksheet.write_column(oh_row, oh_values_col, rates_values, cell_borders_and_currency)
+
+            # Asset output
             asset_output_headers = ["Health Authority",
                                     "Shop",
                                     "Site",
+                                    "Model Number",
                                     "Asset Description",
                                     "Qty",
                                     "Annual Support Hours per Asset",
-                                    "Maintenance Expense per Asset",
+                                    "OH Cost per Asset",
+                                    "Direct Cost per Asset",
                                     "Cost to Service per Asset",
                                     "Total Cost to Service"]
 
-            asset_row = 8
+            asset_row = 13
             asset_col = 0
 
             worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
@@ -270,36 +274,55 @@ class BudgetReport:
             for asset in cost_centre.assets:
                 asset_row += 1
 
-                maintenance_exp = cost_centre.weighted_avg_tech_hourly_wage * asset.avg_support_hours
-                per_asset_cost = cost_centre.pohr * asset.avg_support_hours + maintenance_exp
+                # oh_cost = asset.avg_support_hours * cost_centre.pohr
+                # direct_cost = cost_centre.weighted_avg_tech_hourly_wage * asset.avg_support_hours
+                # per_asset_cost = cost_centre.pohr * asset.avg_support_hours + direct_cost
 
                 row_data = [asset.health_auth,
                             asset.shop_code,
                             asset.site_code,
+                            asset.model_num,
                             asset.name,
                             asset.qty,
                             asset.avg_support_hours,
-                            maintenance_exp,
-                            per_asset_cost,
-                            asset.qty * per_asset_cost
+                            # oh_cost,
+                            # direct_cost,
+                            # per_asset_cost,
+                            # asset.qty * per_asset_cost
                             ]
 
                 worksheet.write_row(asset_row, asset_col, row_data, cell_borders)
 
-                worksheet.set_column(0, 0, 17)  # Col A
-                worksheet.set_column(1, 2, 15)  # Col B, C
-                worksheet.set_column(3, 3, 70)  # Col D
-                worksheet.set_column(4, 4, 7)  # Col E
-                worksheet.set_column(5, 7, 30)  # Col F, G, H
-                worksheet.set_column(8, 8, 24)  # Col I
+                worksheet.set_column(0, 0, 17)    # Col A
+                worksheet.set_column(1, 3, 15)    # Col B, C, D
+                worksheet.set_column(4, 4, 70)    # Col E
+                worksheet.set_column(5, 5, 7)     # Col F
+                worksheet.set_column(6, 6, 30)    # Col G
+                worksheet.set_column(7, 9, 23)    # Col H, I, J
+                worksheet.set_column(10, 10, 20)  # Col K
 
-                worksheet.conditional_format("G10:I1000", {"type": "no_blanks",
+                worksheet.conditional_format("H10:K1000", {"type": "no_blanks",
                                                            "format": currency})
 
-                worksheet.conditional_format("F10:F1000", {"type": "no_blanks",
+                worksheet.conditional_format("G10:G1000", {"type": "no_blanks",
                                                            "format": decimal_hundredth})
 
-                worksheet.conditional_format("I9:I1000", {"type": "no_blanks",
+                worksheet.conditional_format("K9:K1000", {"type": "no_blanks",
                                                           "format": total_cost_to_service})
+
+            for row in range(15, asset_row + 2):
+                wo_hours_cell = "G" + str(row)
+                worksheet.write_formula(row - 1, 7, "=B10*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+                worksheet.write_formula(row - 1, 8, "=B11*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+
+                oh_cost_cell = "H" + str(row)
+                direct_cost_cell = "I" + str(row)
+                worksheet.write_formula(row - 1,
+                                        9,
+                                        "=SUM({oh}, {direct})".format(oh=oh_cost_cell, direct=direct_cost_cell), cell_borders)
+
+                qty_cell = "F" + str(row)
+                per_asset_cost = "J" + str(row)
+                worksheet.write_formula(row - 1, 10, "{unit_cost} * {qty}".format(unit_cost=per_asset_cost, qty=qty_cell), cell_borders)
 
         workbook.close()
