@@ -23,9 +23,8 @@ class RegionalStaff(Staff, ABC):
         # Number of cost centres supported
         self.oh_cost_per_cc = self.compute_oh_cost_per_cc()
 
-
     def compute_annual_salary(self):
-        return self.max_annual_salary
+        return (self.max_annual_salary + self.min_annual_salary) / 2
 
     def determine_cost_centre_resp(self, clinical_renal_resp, imaging_resp, cc_responsibility_ref):
         """
