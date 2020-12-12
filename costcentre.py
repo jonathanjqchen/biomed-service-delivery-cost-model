@@ -71,7 +71,7 @@ class CostCentre:
     tech_staff_df = read_tech_staff_ref()
     tech_staff_salary_dict = read_tech_staff_salary_sched()
     hours_paid_per_year = read_hours_paid_per_year()
-    OH_TECH_TIME_PERCENTAGE = 0.3
+    OH_TECH_TIME_PERCENTAGE = 0.35
     financial_reports_folder_path = "model_inputs/financial_reports/"
     hours_worked_per_day = read_hours_per_day()
     semi_prod_days_per_year = read_semi_prod_days()

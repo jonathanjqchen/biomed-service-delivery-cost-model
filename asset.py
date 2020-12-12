@@ -18,7 +18,7 @@ class Asset:
         :param shop_code: Shop code, for determining the function (clinical, renal imaging) of a device
         :param sites_cc_dict: Dictionary reference that shows corresponding cost centres for a given site
         """
-        self.model_num = model_num.strip()
+        self.model_num = model_num
         self.name = name.strip()
         self.qty = qty
         self.health_auth = health_auth.strip()

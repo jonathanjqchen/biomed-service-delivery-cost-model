@@ -274,10 +274,6 @@ class BudgetReport:
             for asset in cost_centre.assets:
                 asset_row += 1
 
-                # oh_cost = asset.avg_support_hours * cost_centre.pohr
-                # direct_cost = cost_centre.weighted_avg_tech_hourly_wage * asset.avg_support_hours
-                # per_asset_cost = cost_centre.pohr * asset.avg_support_hours + direct_cost
-
                 row_data = [asset.health_auth,
                             asset.shop_code,
                             asset.site_code,
@@ -285,10 +281,6 @@ class BudgetReport:
                             asset.name,
                             asset.qty,
                             asset.avg_support_hours,
-                            # oh_cost,
-                            # direct_cost,
-                            # per_asset_cost,
-                            # asset.qty * per_asset_cost
                             ]
 
                 worksheet.write_row(asset_row, asset_col, row_data, cell_borders)

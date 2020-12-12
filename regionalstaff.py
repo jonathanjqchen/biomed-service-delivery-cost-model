@@ -50,7 +50,6 @@ class RegionalStaff(Staff, ABC):
         else:
             imaging_resp_list = 0
 
-        #
         cc_responsibility_list = []
 
         if clinical_renal_resp_list != 0:
