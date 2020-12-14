@@ -215,106 +215,186 @@ class BudgetReport:
 
         # One worksheet per cost centre
         for key in self.cost_centres:
-            cost_centre = self.cost_centres.get(key)
-            worksheet = workbook.add_worksheet(cost_centre.name)
 
-            # Title
-            worksheet.write("A1",
-                            "{name}: Annual Service Delivery Costs for Net New Equipment".format(name=cost_centre.name),
-                            title)
-
-            # OH output
-            worksheet.write("A3", "OH Information", title)
-
-            total_oh = cost_centre.regional_staff_oh + cost_centre.tech_staff_oh + cost_centre.non_labour_oh
-
-            oh_headers = ["Total OH", "Non-labour OH", "Tech Staff OH", "Regional Staff OH"]
-            oh_values = [total_oh,
-                         cost_centre.non_labour_oh,
-                         cost_centre.tech_staff_oh,
-                         cost_centre.regional_staff_oh]
-
-            oh_row = 3
-            oh_header_col = 0
-            oh_values_col = 1
-
-            worksheet.write_column(oh_row, oh_header_col, oh_headers, heading)
-            worksheet.write_column(oh_row, oh_values_col, oh_values, cell_borders_and_currency)
-
-            # Rates output
-            worksheet.write("A9", "Rates", title)
-
-            rates_headers = ["POHR", "Tech $/hr"]
-            rates_values = [cost_centre.pohr,
-                            cost_centre.weighted_avg_tech_hourly_wage]
-
-            oh_row = 9
-
-            worksheet.write_column(oh_row, oh_header_col, rates_headers, heading)
-            worksheet.write_column(oh_row, oh_values_col, rates_values, cell_borders_and_currency)
-
-            # Asset output
-            asset_output_headers = ["Health Authority",
-                                    "Shop",
-                                    "Site",
-                                    "Model Number",
-                                    "Asset Description",
-                                    "Qty",
-                                    "Annual Support Hours per Asset",
-                                    "OH Cost per Asset",
-                                    "Direct Cost per Asset",
-                                    "Cost to Service per Asset",
-                                    "Total Cost to Service"]
-
-            asset_row = 13
-            asset_col = 0
-
-            worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
-
-            for asset in cost_centre.assets:
-                asset_row += 1
-
-                row_data = [asset.health_auth,
-                            asset.shop_code,
-                            asset.site_code,
-                            asset.model_num,
-                            asset.name,
-                            asset.qty,
-                            asset.avg_support_hours,
-                            ]
-
-                worksheet.write_row(asset_row, asset_col, row_data, cell_borders)
-
-                worksheet.set_column(0, 0, 17)    # Col A
-                worksheet.set_column(1, 3, 15)    # Col B, C, D
-                worksheet.set_column(4, 4, 70)    # Col E
-                worksheet.set_column(5, 5, 7)     # Col F
-                worksheet.set_column(6, 6, 30)    # Col G
-                worksheet.set_column(7, 9, 23)    # Col H, I, J
-                worksheet.set_column(10, 10, 20)  # Col K
-
-                worksheet.conditional_format("H10:K1000", {"type": "no_blanks",
-                                                           "format": currency})
-
-                worksheet.conditional_format("G10:G1000", {"type": "no_blanks",
-                                                           "format": decimal_hundredth})
-
-                worksheet.conditional_format("K9:K1000", {"type": "no_blanks",
-                                                          "format": total_cost_to_service})
-
-            for row in range(15, asset_row + 2):
-                wo_hours_cell = "G" + str(row)
-                worksheet.write_formula(row - 1, 7, "=B10*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
-                worksheet.write_formula(row - 1, 8, "=B11*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
-
-                oh_cost_cell = "H" + str(row)
-                direct_cost_cell = "I" + str(row)
-                worksheet.write_formula(row - 1,
-                                        9,
-                                        "=SUM({oh}, {direct})".format(oh=oh_cost_cell, direct=direct_cost_cell), cell_borders)
-
-                qty_cell = "F" + str(row)
-                per_asset_cost = "J" + str(row)
-                worksheet.write_formula(row - 1, 10, "{unit_cost} * {qty}".format(unit_cost=per_asset_cost, qty=qty_cell), cell_borders)
+            self.write_cost_centre_output(cell_borders, cell_borders_and_currency, currency, decimal_hundredth, heading,
+                                          key, title, total_cost_to_service, workbook)
 
         workbook.close()
+
+    def write_cost_centre_output(self, cell_borders, cell_borders_and_currency, currency, decimal_hundredth, heading,
+                                 key, title, total_cost_to_service, workbook):
+        cost_centre = self.cost_centres.get(key)
+        worksheet = workbook.add_worksheet(cost_centre.name)
+        # Title
+        worksheet.write("A1",
+                        "{name}: Annual Service Delivery Costs for Net New Equipment".format(name=cost_centre.name),
+                        title)
+        # OH output
+        worksheet.write("A3", "OH Information", title)
+        total_oh = cost_centre.regional_staff_oh + cost_centre.tech_staff_oh + cost_centre.non_labour_oh
+        oh_headers = ["Total OH", "Non-labour OH", "Tech Staff OH", "Regional Staff OH"]
+        oh_values = [total_oh,
+                     cost_centre.non_labour_oh,
+                     cost_centre.tech_staff_oh,
+                     cost_centre.regional_staff_oh]
+        oh_row = 3
+        oh_header_col = 0
+        oh_values_col = 1
+        worksheet.write_column(oh_row, oh_header_col, oh_headers, heading)
+        worksheet.write_column(oh_row, oh_values_col, oh_values, cell_borders_and_currency)
+        # Rates output
+        worksheet.write("A9", "Rates", title)
+        rates_headers = ["POHR", "Tech $/hr"]
+        rates_values = [cost_centre.pohr,
+                        cost_centre.weighted_avg_tech_hourly_wage]
+        oh_row = 9
+        worksheet.write_column(oh_row, oh_header_col, rates_headers, heading)
+        worksheet.write_column(oh_row, oh_values_col, rates_values, cell_borders_and_currency)
+
+        if cost_centre.function == "imaging":
+            self.write_imag_asset_output(cell_borders, cost_centre, currency, decimal_hundredth, heading,
+                                         total_cost_to_service, worksheet)
+        else:
+            self.write_asset_output(cell_borders, cost_centre, currency, decimal_hundredth, heading,
+                                    total_cost_to_service, worksheet)
+
+    def write_imag_asset_output(self, cell_borders, cost_centre, currency, decimal_hundredth, heading,
+                                total_cost_to_service, worksheet):
+
+        # Asset output
+        asset_output_headers = ["Health Authority",
+                                "Shop",
+                                "Site",
+                                "Model Number",
+                                "Asset Description",
+                                "Qty",
+                                "Annual Support Hours per Asset",
+                                "OH Cost per Asset",
+                                "WO Cost per Asset",
+                                "Service Contract Cost per Asset",
+                                "Cost to Service per Asset",
+                                "Total Cost to Service"]
+
+        asset_row = 13
+        asset_col = 0
+
+        worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
+
+        for asset in cost_centre.assets:
+            asset_row += 1
+
+            row_data = [asset.health_auth,
+                        asset.shop_code,
+                        asset.site_code,
+                        asset.model_num,
+                        asset.name,
+                        asset.qty,
+                        asset.avg_support_hours
+                        ]
+
+            worksheet.write_row(asset_row, asset_col, row_data, cell_borders)
+
+            worksheet.set_column(0, 0, 17)    # Col A
+            worksheet.set_column(1, 3, 15)    # Col B, C, D
+            worksheet.set_column(4, 4, 70)    # Col E
+            worksheet.set_column(5, 5, 7)     # Col F
+            worksheet.set_column(6, 6, 30)    # Col G
+            worksheet.set_column(7, 8, 23)    # Col H, I
+            worksheet.set_column(9, 9, 30)    # Col J
+            worksheet.set_column(10, 10, 23)  # Col K
+            worksheet.set_column(11, 11, 20)  # Col L
+
+            worksheet.conditional_format("H10:L10000", {"type": "no_blanks",
+                                                        "format": currency})
+
+            worksheet.conditional_format("G10:G10000", {"type": "no_blanks",
+                                                        "format": decimal_hundredth})
+
+            worksheet.conditional_format("L9:L10000", {"type": "no_blanks",
+                                                       "format": total_cost_to_service})
+
+        for row in range(15, asset_row + 2):
+            wo_hours_cell = "G" + str(row)
+            worksheet.write_formula(row - 1, 7, "=B10*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+            worksheet.write_formula(row - 1, 8, "=B11*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+            worksheet.write(row - 1, 9, 0, cell_borders)
+
+
+            oh_cost_cell = "H" + str(row)
+            direct_cost_cell = "I" + str(row)
+            service_contract_cell = "J" + str(row)
+
+            worksheet.write_formula(row - 1, 10, "=SUM({oh}, {wo}, {contract})".format(oh=oh_cost_cell,
+                                                                                       wo=direct_cost_cell,
+                                                                                       contract=service_contract_cell),
+                                    cell_borders)
+
+            # Total cost to Service
+            qty_cell = "F" + str(row)
+            per_asset_cost = "K" + str(row)
+            worksheet.write_formula(row - 1, 11, "{unit_cost}*{qty}".format(unit_cost=per_asset_cost, qty=qty_cell),
+                                    cell_borders)
+
+    def write_asset_output(self, cell_borders, cost_centre, currency, decimal_hundredth, heading, total_cost_to_service,
+                           worksheet):
+        # Asset output
+        asset_output_headers = ["Health Authority",
+                                "Shop",
+                                "Site",
+                                "Model Number",
+                                "Asset Description",
+                                "Qty",
+                                "Annual Support Hours per Asset",
+                                "OH Cost per Asset",
+                                "Direct Cost per Asset",
+                                "Cost to Service per Asset",
+                                "Total Cost to Service"]
+        asset_row = 13
+        asset_col = 0
+        worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
+        for asset in cost_centre.assets:
+            asset_row += 1
+
+            row_data = [asset.health_auth,
+                        asset.shop_code,
+                        asset.site_code,
+                        asset.model_num,
+                        asset.name,
+                        asset.qty,
+                        asset.avg_support_hours
+                        ]
+
+            worksheet.write_row(asset_row, asset_col, row_data, cell_borders)
+
+            worksheet.set_column(0, 0, 17)  # Col A
+            worksheet.set_column(1, 3, 15)  # Col B, C, D
+            worksheet.set_column(4, 4, 70)  # Col E
+            worksheet.set_column(5, 5, 7)  # Col F
+            worksheet.set_column(6, 6, 30)  # Col G
+            worksheet.set_column(7, 9, 23)  # Col H, I, J
+            worksheet.set_column(10, 10, 20)  # Col K
+
+            worksheet.conditional_format("H10:K10000", {"type": "no_blanks",
+                                                        "format": currency})
+
+            worksheet.conditional_format("G10:G10000", {"type": "no_blanks",
+                                                        "format": decimal_hundredth})
+
+            worksheet.conditional_format("K9:K10000", {"type": "no_blanks",
+                                                       "format": total_cost_to_service})
+        for row in range(15, asset_row + 2):
+            wo_hours_cell = "G" + str(row)
+            worksheet.write_formula(row - 1, 7, "=B10*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+            worksheet.write_formula(row - 1, 8, "=B11*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+
+            oh_cost_cell = "H" + str(row)
+            direct_cost_cell = "I" + str(row)
+            worksheet.write_formula(row - 1,
+                                    9,
+                                    "=SUM({oh}, {direct})".format(oh=oh_cost_cell, direct=direct_cost_cell),
+                                    cell_borders)
+
+            qty_cell = "F" + str(row)
+            per_asset_cost = "J" + str(row)
+            worksheet.write_formula(row - 1, 10, "{unit_cost}*{qty}".format(unit_cost=per_asset_cost, qty=qty_cell),
+                                    cell_borders)
