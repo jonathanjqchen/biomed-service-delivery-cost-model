@@ -17,7 +17,7 @@ def main():
 
     print("Computing cost to service...")
 
-    # Create CostCentre objects relevant to the Asset objects above
+    # Create CostCentre objects based on the Asset objects above
     budget_report.create_cost_centre_objects(assets, budget_report)
 
     # Compute asset support hours

@@ -8,18 +8,31 @@ from regionalstaff import RegionalStaff
 pd.set_option("display.expand_frame_repr", False)
 
 
+"""
+########################################################################################################################
+##################################### MODULE SCOPE FUNCTIONS BELOW #####################################################
+########################################################################################################################
+"""
+
+
 def read_sites_cost_centres_reference():
     """
     Pulls data from cost_centres_and_sites_reference.xlsx into a dictionary so that we can find the corresponding cost
     centres for a given site
-    :return: Dictionary with key: "site" and value: ["clinical cost centre", "renal cost centre", "imaging cost centre]
+
+    :return: Dictionary with key: "site" and value: ["clinical cost centre", "renal cost centre", "imaging cost centre"]
     """
 
     # File path to cost_centres_and_sites_reference.xlsx
     sites_cc_file_path = "model_inputs/cost_centres_and_sites/cost_centres_and_sites_reference.xlsx"
 
     # Read into df the "site", "clinical_cost_centre", "renal_cost_centre", "imaging_cost_centre" fields
-    sites_cc_df = pd.read_excel(sites_cc_file_path, sheet_name="Sites", usecols="A, D:F")
+    sites_cc_df = pd.read_excel(sites_cc_file_path,
+                                sheet_name="Sites",
+                                usecols=["site_code",
+                                         "clinical_cost_centre",
+                                         "renal_cost_centre",
+                                         "imaging_cost_centre"])
 
     # Convert dataframe into dictionary
     sites_cc_dict = sites_cc_df.set_index("site_code").T.to_dict("list")
@@ -29,6 +42,9 @@ def read_sites_cost_centres_reference():
 
 def read_cc_responsibility_reference():
     """
+    Parses "Cost Centres" sheet in cost_centres_and_sites_reference.xlsx and creates a nested dictionary that gives us a
+    list of cost centres for each HA-function combination, where "function" refers to the type of asset (i.e. clinical,
+    renal, imaging).
 
     :return: Nested dictionary in the form {"HA1": {"function1": ["cost_centre1, cost_centre2"]
                                                     "function2": ["cost_centre1"]
@@ -39,15 +55,24 @@ def read_cc_responsibility_reference():
     # File path to cost_centres_and_sites_reference.xlsx
     sites_cc_file_path = "model_inputs/cost_centres_and_sites/cost_centres_and_sites_reference.xlsx"
 
-    cc_responsibility_df = pd.read_excel(sites_cc_file_path, sheet_name="Cost Centres", usecols="B:D")
+    # Read into df the "cost_centre_name", "health_authority", "function" fields
+    cc_responsibility_df = pd.read_excel(sites_cc_file_path,
+                                         sheet_name="Cost Centres",
+                                         usecols=["cost_centre_name",
+                                                  "health_authority",
+                                                  "function"])
 
+    # Get unique HA and function values from cc_responsibility_df and store in numpy array
     health_auth = cc_responsibility_df["health_authority"].unique()
     function = cc_responsibility_df["function"].unique()
+
+    # Initialize a partially filled nested dictionary
     cc_responsibility_dict = {health_auth[0]: {function[0]: [], function[1]: [], function[2]: []},
                               health_auth[1]: {function[0]: [], function[1]: [], function[2]: []},
                               health_auth[2]: {function[0]: [], function[1]: [], function[2]: []},
                               health_auth[3]: {function[0]: [], function[1]: [], function[2]: []}}
 
+    # Populate cc_responsibility_dict with the cost centres for each HA-function combination
     for ha in health_auth:
         for func in function:
             temp_df = cc_responsibility_df.loc[(cc_responsibility_df["health_authority"] == ha) &
@@ -58,50 +83,53 @@ def read_cc_responsibility_reference():
     return cc_responsibility_dict
 
 
+"""
+########################################################################################################################
+######################################## BUDGETREPORT CLASS BELOW ######################################################
+########################################################################################################################
+"""
+
+
 class BudgetReport:
     """
     This class handles all data and behaviour associated with the budget report input and budget report output Excel
-    files
+    files.
     """
+
     # Path to budget report input file
     budget_report_input_file_path = "model_inputs/budget_report_input.xlsx"
-    # Dict with sites and corresponding cost centres
+    # Dict with sites and their corresponding cost centres
     sites_cost_centre_dict = read_sites_cost_centres_reference()
-    # Dict with HA and corresponding cost centres
+    # Nested dict with HA, asset function, and their corresponding cost centres
     cost_centre_responsibility_dict = read_cc_responsibility_reference()
-
-    # Number of rows to skip in budget report input file to get to asset details
-    # SKIP_ROWS = 4
 
     def __init__(self):
         """
-        Initialize instance variables
+        Initialize instance variables.
         """
 
-        # Dictionary with key: "cost centre string" and value: CostCentre object
+        # Dictionary with key: "cost centre name" and value: CostCentre object
         self.cost_centres = {}
 
     def create_asset_objects(self):
         """
-        Pulls asset details inputted by user into budget report input file and creates an Asset object for each row of
-        asset details entered
-        :return: List of Asset objects that correspond to input entered by user into budget report input file
+        Pulls asset details inputted by user into budget_report_input.xlsx and creates an Asset object for each row of
+        asset details entered.
+
+        :return: List of Asset objects that correspond to input entered by user into budget_report_input.xlsx
         """
 
         # Read asset details into dataframe
         df = pd.read_excel(self.budget_report_input_file_path, sheet_name="User Input")
 
-        '''
-        Convert dataframe into dictionary...
-        Key: "df index"
-        Value: ["model_num", "asset_description", "quantity", "health_auth", "site_code", "shop_code"]
-        '''
-        # assets_dict = df.set_index("asset_description").T.to_dict("list")
+        # Convert dataframe into dictionary
+        #   Key: "df index"
+        #   Value: ["model_num", "asset_description", "quantity", "health_auth", "site_code", "shop_code"]
         assets_dict = df.T.to_dict("list")
 
+        # Iterate through assets_dict, create Asset object for each value, and append to assets list
         assets = []
 
-        # Iterate through dictionary, create Asset object for each entry, and append to assets list
         for asset, details in assets_dict.items():
             assets.append(Asset(details[0],  # model_num
                                 details[1],  # asset_description
@@ -115,18 +143,25 @@ class BudgetReport:
 
     def create_cost_centre_objects(self, assets, budget_report):
         """
+        Creates CostCentre objects associated with the asset inputs to the model. CostCentre objects are added to
+        BudgetReport's cost_centres dictionary instance variable. The dictionary takes the form:
 
-        :param assets:
-        :param budget_report:
-        :return:
+                Key: "Cost centre name"
+                Value: CostCentre object
+
+        :param assets: List of Asset objects
+        :param budget_report: BudgetReport object
+        :return: None
         """
+
+        # Iterate through each asset inputted by the user
         for asset in assets:
             '''
             If the asset's cost centre already exists in the cost_centres dictionary, append the asset to the CostCentre
             object's list of assets.
             
             If the asset's cost centre doesn't already exist in the cost_centres dictionary, create the CostCentre
-            object and then add it to the dictionary (asset is added to the CostCentre object by default)
+            object and then add it to the dictionary (asset is added to the CostCentre object by default in __init__())
             '''
             if asset.cost_centre in self.cost_centres:
                 self.cost_centres.get(asset.cost_centre).assets.append(asset)
@@ -140,6 +175,12 @@ class BudgetReport:
             asset.assign_permanent_cost_centre(self.cost_centres.get(last_key_inserted))
 
     def create_regional_staff_objects(self):
+        """
+        Reads in data on regional staff from "Regional Staff" worksheet in staff_salaries.xlsx and uses data to create
+        RegionalStaff objects.
+
+        :return: List of RegionalStaff objects
+        """
 
         # File path to regional_staff_salaries.xlsx
         regional_staff_salaries_file_path = "model_inputs/labour_reports/staff_salaries.xlsx"
@@ -152,8 +193,9 @@ class BudgetReport:
 
         regional_staff = []
 
+        # Iterate through dictionary of regional staff details and create RegionalStaff objects
         for staff_name, staff_details in regional_staff_dict.items():
-            regional_staff.append(RegionalStaff(staff_name,  # Staff name
+            regional_staff.append(RegionalStaff(staff_name,        # Staff name
                                                 staff_details[0],  # Staff title (i.e. Director, engineer, etc.)
                                                 staff_details[2],  # Min salary
                                                 staff_details[3],  # Max salary
@@ -165,26 +207,33 @@ class BudgetReport:
         return regional_staff
 
     def compute_asset_support_hours(self):
+        """
+        Iterates through each asset inputted by the user and reads from "asset_support_hours_reference.xlsx" the average
+        work order hours spent on each model of an asset and stores this float in the asset's avg_support_hours field.
+
+        :return: None
+        """
 
         # File path to asset_support_hours_reference.xlsx
         asset_support_hours_file_path = "model_inputs/wo_reports/asset_support_hours_reference.xlsx"
-
+        # Read data into df and index the relevant columns
         asset_support_hours_df = pd.read_excel(asset_support_hours_file_path)
         asset_support_hours_df = asset_support_hours_df[["asset_description",
                                                          "model_number",
                                                          "avg_support_hour_per_model",
                                                          "count_asset"]]
 
+        # Loop through all the assets that were inputted by the user
         for key in self.cost_centres:
             cost_centre = self.cost_centres.get(key)
             asset_objects = cost_centre.assets
             for asset in asset_objects:
-                # Create df with rows that only contain model # of current asset
+                # Filter asset_support_hours_df with rows that only contain model # of current asset
                 filtered_model_df = asset_support_hours_df[asset_support_hours_df["model_number"] == asset.model_num]
-                # If model number exists in asset_support_hours_reference.xlsx, compute average support hours for current model
+                # If model number exists in the df, compute average support hours for current model
                 if not filtered_model_df.empty:
                     asset.avg_support_hours = filtered_model_df["avg_support_hour_per_model"].mean()
-                # If model number doesn't exist in asset_support_hours_reference.xlsx, compute weighted average support hours for current asset
+                # If model number doesn't exist in df, compute weighted average support hours for current asset
                 else:
                     # Create df with rows that only contain the asset_description of current asset
                     filtered_asset_df = asset_support_hours_df[asset_support_hours_df["asset_description"] == asset.name]
@@ -198,10 +247,17 @@ class BudgetReport:
                     asset.avg_support_hours = asset_model_num_df["weight"].sum()
 
     def write_output_to_excel(self):
+        """
+        Write cost model output to an excel file in /model_outputs/budget_report_output.xlsx. Run the model to see
+        sample output.
+
+        Read the docs for more information on how to use xlsxwriter: https://xlsxwriter.readthedocs.io/
+
+        :return: None
+        """
 
         dir_path = os.getcwd()
         budget_output_file_path = r"{dir_path}\model_outputs\budget_report_output.xlsx".format(dir_path=dir_path)
-
         workbook = xlsxwriter.Workbook(budget_output_file_path)
 
         # Formatting
@@ -213,18 +269,41 @@ class BudgetReport:
         decimal_hundredth = workbook.add_format({"num_format": "#,##0.00"})
         total_cost_to_service = workbook.add_format({"font_color": "white", "bg_color": "#538dd5"})
 
-        # One worksheet per cost centre
+        # Loop through each cost centre that we are budgeting for
         for key in self.cost_centres:
 
+            # Call helper function to write:
+            #       - OH: Total OH, non-labour OH, tech staff OH, regional staff OH
+            #       - Rates: POHR, tech wage per hour
             self.write_cost_centre_output(cell_borders, cell_borders_and_currency, currency, decimal_hundredth, heading,
                                           key, title, total_cost_to_service, workbook)
 
+        # Output will only be written if workbook.close() is called
         workbook.close()
 
     def write_cost_centre_output(self, cell_borders, cell_borders_and_currency, currency, decimal_hundredth, heading,
                                  key, title, total_cost_to_service, workbook):
+        """
+        Writes title, OH, and rates output to a worksheet in budget_report_output.xlsx for the given cost_centre. See
+        "# Formatting" in BudgetReport.write_output_to_excel() for more information on formatting variables passed as
+        arguments to this method.
+
+        :param cell_borders: Formatting variable
+        :param cell_borders_and_currency: Formatting variable
+        :param currency: Formatting variable
+        :param decimal_hundredth: Formatting variable
+        :param heading: Formatting variable
+        :param key: Cost centre name as a string
+        :param title: Formatting variable
+        :param total_cost_to_service: Formatting variable
+        :param workbook: xlsxwriter object representing budget_report_output.xlsx
+        :return: None
+        """
+
+        # Create a new worksheet for each cost centre
         cost_centre = self.cost_centres.get(key)
         worksheet = workbook.add_worksheet(cost_centre.name)
+
         # Title
         worksheet.write("A1",
                         "{name}: Annual Service Delivery Costs for Net New Equipment".format(name=cost_centre.name),
@@ -242,6 +321,7 @@ class BudgetReport:
         oh_values_col = 1
         worksheet.write_column(oh_row, oh_header_col, oh_headers, heading)
         worksheet.write_column(oh_row, oh_values_col, oh_values, cell_borders_and_currency)
+
         # Rates output
         worksheet.write("A9", "Rates", title)
         rates_headers = ["POHR", "Tech $/hr"]
@@ -251,6 +331,8 @@ class BudgetReport:
         worksheet.write_column(oh_row, oh_header_col, rates_headers, heading)
         worksheet.write_column(oh_row, oh_values_col, rates_values, cell_borders_and_currency)
 
+        # Call helper functions to write asset output (support hours per asset, cost to service, etc.) because the
+        # output is slightly different for imaging vs. clinical and renal assets
         if cost_centre.function == "imaging":
             self.write_imag_asset_output(cell_borders, cost_centre, currency, decimal_hundredth, heading,
                                          total_cost_to_service, worksheet)
@@ -260,8 +342,20 @@ class BudgetReport:
 
     def write_imag_asset_output(self, cell_borders, cost_centre, currency, decimal_hundredth, heading,
                                 total_cost_to_service, worksheet):
+        """
+        Write asset output for imaging cost centres.
 
-        # Asset output
+        :param cell_borders: Formatting variable
+        :param cost_centre: CostCentre object for which we are writing output
+        :param currency: Formatting variable
+        :param decimal_hundredth: Formatting variable
+        :param heading: Formatting variable
+        :param total_cost_to_service: Formatting variable
+        :param worksheet: xlsx object representing current worksheet to which we are writing
+        :return: None
+        """
+
+        # Asset output headings
         asset_output_headers = ["Health Authority",
                                 "Shop",
                                 "Site",
@@ -280,9 +374,13 @@ class BudgetReport:
 
         worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
 
+        # Asset output details
         for asset in cost_centre.assets:
+
+            # Start at new row
             asset_row += 1
 
+            # Store asset details in a list
             row_data = [asset.health_auth,
                         asset.shop_code,
                         asset.site_code,
@@ -292,8 +390,10 @@ class BudgetReport:
                         asset.avg_support_hours
                         ]
 
+            # Write asset details from row_data list to the row
             worksheet.write_row(asset_row, asset_col, row_data, cell_borders)
 
+            # Set column widths
             worksheet.set_column(0, 0, 17)    # Col A
             worksheet.set_column(1, 3, 15)    # Col B, C, D
             worksheet.set_column(4, 4, 70)    # Col E
@@ -304,32 +404,52 @@ class BudgetReport:
             worksheet.set_column(10, 10, 23)  # Col K
             worksheet.set_column(11, 11, 20)  # Col L
 
-            worksheet.conditional_format("H10:L10000", {"type": "no_blanks",
-                                                        "format": currency})
+            # Formatting for specific columns
+            worksheet.conditional_format("H10:L1000000", {"type": "no_blanks",
+                                                          "format": currency})
 
-            worksheet.conditional_format("G10:G10000", {"type": "no_blanks",
-                                                        "format": decimal_hundredth})
+            worksheet.conditional_format("G10:G1000000", {"type": "no_blanks",
+                                                          "format": decimal_hundredth})
 
-            worksheet.conditional_format("L9:L10000", {"type": "no_blanks",
-                                                       "format": total_cost_to_service})
+            worksheet.conditional_format("L9:L1000000", {"type": "no_blanks",
+                                                         "format": total_cost_to_service})
+
+        '''
+        Write formulas in cells for:
+           - OH Cost Per Asset
+           - Direct Cost Per Asset
+           - Service Contract Cost Per Asset
+           - Cost to Service Per Asset
+           - Total Cost to Service
+        
+        for loop explanation:
+            - Start at row 15 because it is the first row after the headers
+            - asset_row is the last row that was written to, but we need to add 2 to it because it is based on 
+              zero-based indexing (+1) and second arg in Python range() function is not inclusive (+1) 
+        '''
 
         for row in range(15, asset_row + 2):
+            # Cell containing WO hours for current row
             wo_hours_cell = "G" + str(row)
+            # Formula for OH Cost Per Asset = POHR (B10) * WO hours
             worksheet.write_formula(row - 1, 7, "=B10*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+            # Formula for Direct Cost Per Asset = Tech $/hr (B11) * WO hours
             worksheet.write_formula(row - 1, 8, "=B11*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+            # Write 0 as dummy value for each row under Service Contract Cost Per Asset
             worksheet.write(row - 1, 9, 0, cell_borders)
 
-
+            # Formula for Cost to Service Per Asset = OH Costs + Direct Costs + Service Contract Costs
             oh_cost_cell = "H" + str(row)
             direct_cost_cell = "I" + str(row)
             service_contract_cell = "J" + str(row)
-
-            worksheet.write_formula(row - 1, 10, "=SUM({oh}, {wo}, {contract})".format(oh=oh_cost_cell,
-                                                                                       wo=direct_cost_cell,
-                                                                                       contract=service_contract_cell),
+            worksheet.write_formula(row - 1,
+                                    10,
+                                    "=SUM({oh}, {wo}, {contract})".format(oh=oh_cost_cell,
+                                                                          wo=direct_cost_cell,
+                                                                          contract=service_contract_cell),
                                     cell_borders)
 
-            # Total cost to Service
+            # Formula for Total Cost to Service = Qty * Cost to Service Per Asset
             qty_cell = "F" + str(row)
             per_asset_cost = "K" + str(row)
             worksheet.write_formula(row - 1, 11, "{unit_cost}*{qty}".format(unit_cost=per_asset_cost, qty=qty_cell),
@@ -337,7 +457,20 @@ class BudgetReport:
 
     def write_asset_output(self, cell_borders, cost_centre, currency, decimal_hundredth, heading, total_cost_to_service,
                            worksheet):
-        # Asset output
+        """
+        Write asset output for clinical/renal cost centres.
+
+        :param cell_borders: Formatting variable
+        :param cost_centre: CostCentre object for which we are writing output
+        :param currency: Formatting variable
+        :param decimal_hundredth: Formatting variable
+        :param heading: Formatting variable
+        :param total_cost_to_service: Formatting variable
+        :param worksheet: xlsx object representing current worksheet to which we are writing
+        :return: None
+        """
+
+        # Asset output headings
         asset_output_headers = ["Health Authority",
                                 "Shop",
                                 "Site",
@@ -352,9 +485,14 @@ class BudgetReport:
         asset_row = 13
         asset_col = 0
         worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
+
+        # Asset output details
         for asset in cost_centre.assets:
+
+            # Start at new row
             asset_row += 1
 
+            # Store asset details in a list
             row_data = [asset.health_auth,
                         asset.shop_code,
                         asset.site_code,
@@ -364,29 +502,50 @@ class BudgetReport:
                         asset.avg_support_hours
                         ]
 
+            # Write asset details from row_data list to the row
             worksheet.write_row(asset_row, asset_col, row_data, cell_borders)
 
-            worksheet.set_column(0, 0, 17)  # Col A
-            worksheet.set_column(1, 3, 15)  # Col B, C, D
-            worksheet.set_column(4, 4, 70)  # Col E
-            worksheet.set_column(5, 5, 7)  # Col F
-            worksheet.set_column(6, 6, 30)  # Col G
-            worksheet.set_column(7, 9, 23)  # Col H, I, J
+            # Set column widths
+            worksheet.set_column(0, 0, 17)    # Col A
+            worksheet.set_column(1, 3, 15)    # Col B, C, D
+            worksheet.set_column(4, 4, 70)    # Col E
+            worksheet.set_column(5, 5, 7)     # Col F
+            worksheet.set_column(6, 6, 30)    # Col G
+            worksheet.set_column(7, 9, 23)    # Col H, I, J
             worksheet.set_column(10, 10, 20)  # Col K
 
-            worksheet.conditional_format("H10:K10000", {"type": "no_blanks",
-                                                        "format": currency})
+            # Formatting for specific columns
+            worksheet.conditional_format("H10:K1000000", {"type": "no_blanks",
+                                                          "format": currency})
 
-            worksheet.conditional_format("G10:G10000", {"type": "no_blanks",
-                                                        "format": decimal_hundredth})
+            worksheet.conditional_format("G10:G1000000", {"type": "no_blanks",
+                                                          "format": decimal_hundredth})
 
-            worksheet.conditional_format("K9:K10000", {"type": "no_blanks",
-                                                       "format": total_cost_to_service})
+            worksheet.conditional_format("K9:K1000000", {"type": "no_blanks",
+                                                         "format": total_cost_to_service})
+
+        '''
+               Write formulas in cells for:
+                  - OH Cost Per Asset
+                  - Direct Cost Per Asset
+                  - Cost to Service Per Asset
+                  - Total Cost to Service
+
+               for loop explanation:
+                   - Start at row 15 because it is the first row after the headers
+                   - asset_row is the last row that was written to, but we need to add 2 to it because it is based on 
+                     zero-based indexing (+1) and second arg in Python range() function is not inclusive (+1) 
+               '''
+
         for row in range(15, asset_row + 2):
+            # Cell containing WO hours for current row
             wo_hours_cell = "G" + str(row)
+            # Formula for OH Cost Per Asset = POHR (B10) * WO hours
             worksheet.write_formula(row - 1, 7, "=B10*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
+            # Formula for Direct Cost Per Asset = Tech $/hr (B11) * WO hours
             worksheet.write_formula(row - 1, 8, "=B11*{wo_hours}".format(wo_hours=wo_hours_cell), cell_borders)
 
+            # Formula for Cost to Service Per Asset = OH Costs + Direct Costs
             oh_cost_cell = "H" + str(row)
             direct_cost_cell = "I" + str(row)
             worksheet.write_formula(row - 1,
@@ -394,6 +553,7 @@ class BudgetReport:
                                     "=SUM({oh}, {direct})".format(oh=oh_cost_cell, direct=direct_cost_cell),
                                     cell_borders)
 
+            # Formula for Total Cost to Service = Qty * Cost to Service Per Asset
             qty_cell = "F" + str(row)
             per_asset_cost = "J" + str(row)
             worksheet.write_formula(row - 1, 10, "{unit_cost}*{qty}".format(unit_cost=per_asset_cost, qty=qty_cell),
