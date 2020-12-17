@@ -110,6 +110,8 @@ class BudgetReport:
 
         # Dictionary with key: "cost centre name" and value: CostCentre object
         self.cost_centres = {}
+        # Current row to which we are writing in the "Summary" worksheet in budget_report_output.xlsx
+        self.summary_row = 2
 
     def create_asset_objects(self):
         """
@@ -230,9 +232,11 @@ class BudgetReport:
             for asset in asset_objects:
                 # Filter asset_support_hours_df with rows that only contain model # of current asset
                 filtered_model_df = asset_support_hours_df[asset_support_hours_df["model_number"] == asset.model_num]
+
                 # If model number exists in the df, compute average support hours for current model
                 if not filtered_model_df.empty:
                     asset.avg_support_hours = filtered_model_df["avg_support_hour_per_model"].mean()
+
                 # If model number doesn't exist in df, compute weighted average support hours for current asset
                 else:
                     # Create df with rows that only contain the asset_description of current asset
@@ -267,22 +271,36 @@ class BudgetReport:
         cell_borders_and_currency = workbook.add_format({"border": True, "num_format": "$#,##0.00"})
         currency = workbook.add_format({"num_format": "$#,##0.00"})
         decimal_hundredth = workbook.add_format({"num_format": "#,##0.00"})
-        total_cost_to_service = workbook.add_format({"font_color": "white", "bg_color": "#538dd5"})
+        total_cost_to_service = workbook.add_format({"font_color": "white",
+                                                     "bg_color": "#538dd5",
+                                                     "border": True,
+                                                     "bold": True})
 
-        # Loop through each cost centre that we are budgeting for
+        # Add summary worksheet that summarizes the budget outputs for each cost centre
+        summary_sheet = workbook.add_worksheet("Summary")
+        summary_sheet.set_column(0, 1, 20)  # Col A, B
+
+        # Loop through each cost centre for which we are budgeting
         for key in self.cost_centres:
 
             # Call helper function to write:
             #       - OH: Total OH, non-labour OH, tech staff OH, regional staff OH
             #       - Rates: POHR, tech wage per hour
             self.write_cost_centre_output(cell_borders, cell_borders_and_currency, currency, decimal_hundredth, heading,
-                                          key, title, total_cost_to_service, workbook)
+                                          key, title, total_cost_to_service, workbook, summary_sheet)
+
+        # Write total cost for all cost centres to "Summary" worksheet
+        summary_sheet.write(0, 0, "Total Cost", total_cost_to_service)
+        summary_sheet.write_formula(0,
+                                    1,
+                                    "=SUM(B3:B{last_row})".format(last_row=self.summary_row+1),
+                                    cell_borders_and_currency)
 
         # Output will only be written if workbook.close() is called
         workbook.close()
 
     def write_cost_centre_output(self, cell_borders, cell_borders_and_currency, currency, decimal_hundredth, heading,
-                                 key, title, total_cost_to_service, workbook):
+                                 key, title, total_cost_to_service, workbook, summary_sheet):
         """
         Writes title, OH, and rates output to a worksheet in budget_report_output.xlsx for the given cost_centre. See
         "# Formatting" in BudgetReport.write_output_to_excel() for more information on formatting variables passed as
@@ -297,6 +315,7 @@ class BudgetReport:
         :param title: Formatting variable
         :param total_cost_to_service: Formatting variable
         :param workbook: xlsxwriter object representing budget_report_output.xlsx
+        :param summary_sheet: Summary worksheet that summarizes the budget outputs for each cost centre
         :return: None
         """
 
@@ -316,32 +335,33 @@ class BudgetReport:
                      cost_centre.non_labour_oh,
                      cost_centre.tech_staff_oh,
                      cost_centre.regional_staff_oh]
-        oh_row = 3
-        oh_header_col = 0
-        oh_values_col = 1
-        worksheet.write_column(oh_row, oh_header_col, oh_headers, heading)
-        worksheet.write_column(oh_row, oh_values_col, oh_values, cell_borders_and_currency)
+        title_row = 3
+        title_col = 0
+        values_col = 1
+        worksheet.write_column(title_row, title_col, oh_headers, heading)
+        worksheet.write_column(title_row, values_col, oh_values, cell_borders_and_currency)
 
         # Rates output
         worksheet.write("A9", "Rates", title)
         rates_headers = ["POHR", "Tech $/hr"]
         rates_values = [cost_centre.pohr,
                         cost_centre.weighted_avg_tech_hourly_wage]
-        oh_row = 9
-        worksheet.write_column(oh_row, oh_header_col, rates_headers, heading)
-        worksheet.write_column(oh_row, oh_values_col, rates_values, cell_borders_and_currency)
+        title_row = 9
+        worksheet.write_column(title_row, title_col, rates_headers, heading)
+        worksheet.write_column(title_row, values_col, rates_values, cell_borders_and_currency)
 
         # Call helper functions to write asset output (support hours per asset, cost to service, etc.) because the
         # output is slightly different for imaging vs. clinical and renal assets
         if cost_centre.function == "imaging":
             self.write_imag_asset_output(cell_borders, cost_centre, currency, decimal_hundredth, heading,
-                                         total_cost_to_service, worksheet)
+                                         total_cost_to_service, worksheet, title, cell_borders_and_currency,
+                                         summary_sheet)
         else:
             self.write_asset_output(cell_borders, cost_centre, currency, decimal_hundredth, heading,
-                                    total_cost_to_service, worksheet)
+                                    total_cost_to_service, worksheet, title, cell_borders_and_currency, summary_sheet)
 
     def write_imag_asset_output(self, cell_borders, cost_centre, currency, decimal_hundredth, heading,
-                                total_cost_to_service, worksheet):
+                                total_cost_to_service, worksheet, title, cell_borders_and_currency, summary_sheet):
         """
         Write asset output for imaging cost centres.
 
@@ -352,6 +372,9 @@ class BudgetReport:
         :param heading: Formatting variable
         :param total_cost_to_service: Formatting variable
         :param worksheet: xlsx object representing current worksheet to which we are writing
+        :param title: Formatting variable
+        :param cell_borders_and_currency: Formatting variable
+        :param summary_sheet: Summary worksheet that summarizes the budget outputs for each cost centre
         :return: None
         """
 
@@ -369,7 +392,7 @@ class BudgetReport:
                                 "Cost to Service per Asset",
                                 "Total Cost to Service"]
 
-        asset_row = 13
+        asset_row = 15
         asset_col = 0
 
         worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
@@ -428,7 +451,7 @@ class BudgetReport:
               zero-based indexing (+1) and second arg in Python range() function is not inclusive (+1) 
         '''
 
-        for row in range(15, asset_row + 2):
+        for row in range(17, asset_row + 2):
             # Cell containing WO hours for current row
             wo_hours_cell = "G" + str(row)
             # Formula for OH Cost Per Asset = POHR (B10) * WO hours
@@ -455,8 +478,26 @@ class BudgetReport:
             worksheet.write_formula(row - 1, 11, "{unit_cost}*{qty}".format(unit_cost=per_asset_cost, qty=qty_cell),
                                     cell_borders)
 
+        # Sum up total costs and write to cell B14
+        worksheet.write("A13", "Total", title)
+        worksheet.write(13, 0, "Net Cost to Service", total_cost_to_service)
+        last_row_cell = "L{row}".format(row=asset_row+1)
+        worksheet.write_formula(13,
+                                1,
+                                "=SUM({start}:{end})".format(start="L17", end=last_row_cell),
+                                cell_borders_and_currency)
+
+        # Write total cost for the cost centre to the "Summary" worksheet
+        summary_sheet.write(self.summary_row, 0, cost_centre.name, heading)
+        total_cost_reference = "{cc_name}!B14".format(cc_name=cost_centre.name)
+        summary_sheet.write_formula(self.summary_row,
+                                    1,
+                                    "={formula}".format(formula=total_cost_reference),
+                                    cell_borders_and_currency)
+        self.summary_row += 1
+
     def write_asset_output(self, cell_borders, cost_centre, currency, decimal_hundredth, heading, total_cost_to_service,
-                           worksheet):
+                           worksheet, title, cell_borders_and_currency, summary_sheet):
         """
         Write asset output for clinical/renal cost centres.
 
@@ -467,6 +508,9 @@ class BudgetReport:
         :param heading: Formatting variable
         :param total_cost_to_service: Formatting variable
         :param worksheet: xlsx object representing current worksheet to which we are writing
+        :param title: Formatting variable
+        :param cell_borders_and_currency: Formatting variable
+        :param summary_sheet: Summary worksheet that summarizes the budget outputs for each cost centre
         :return: None
         """
 
@@ -482,7 +526,7 @@ class BudgetReport:
                                 "Direct Cost per Asset",
                                 "Cost to Service per Asset",
                                 "Total Cost to Service"]
-        asset_row = 13
+        asset_row = 15
         asset_col = 0
         worksheet.write_row(asset_row, asset_col, asset_output_headers, heading)
 
@@ -537,7 +581,7 @@ class BudgetReport:
                      zero-based indexing (+1) and second arg in Python range() function is not inclusive (+1) 
                '''
 
-        for row in range(15, asset_row + 2):
+        for row in range(17, asset_row + 2):
             # Cell containing WO hours for current row
             wo_hours_cell = "G" + str(row)
             # Formula for OH Cost Per Asset = POHR (B10) * WO hours
@@ -558,3 +602,21 @@ class BudgetReport:
             per_asset_cost = "J" + str(row)
             worksheet.write_formula(row - 1, 10, "{unit_cost}*{qty}".format(unit_cost=per_asset_cost, qty=qty_cell),
                                     cell_borders)
+
+        # Sum up total costs and write to cell B14
+        worksheet.write("A13", "Total", title)
+        worksheet.write(13, 0, "Net Cost to Service", total_cost_to_service)
+        last_row_cell = "K{row}".format(row=asset_row+1)
+        worksheet.write_formula(13,
+                                1,
+                                "=SUM({start}:{end})".format(start="K17", end=last_row_cell),
+                                cell_borders_and_currency)
+
+        # Write total cost for the cost centre to the "Summary" worksheet
+        summary_sheet.write(self.summary_row, 0, cost_centre.name, heading)
+        total_cost_reference = "{cc_name}!B14".format(cc_name=cost_centre.name)
+        summary_sheet.write_formula(self.summary_row,
+                                    1,
+                                    "={formula}".format(formula=total_cost_reference),
+                                    cell_borders_and_currency)
+        self.summary_row += 1
