@@ -293,7 +293,7 @@ class BudgetReport:
         summary_sheet.write(0, 0, "Total Cost", total_cost_to_service)
         summary_sheet.write_formula(0,
                                     1,
-                                    "=SUM(B3:B{last_row})".format(last_row=self.summary_row+1),
+                                    "=SUM(B3:B{last_row})".format(last_row=self.summary_row),
                                     cell_borders_and_currency)
 
         # Output will only be written if workbook.close() is called
