@@ -1,21 +1,21 @@
-# Table of Contents
+## Table of Contents
 
-# Biomedical Engineering Service Delivery Cost Model
+## Biomedical Engineering Service Delivery Cost Model
 
-## Research
+### Research
 
-## Design
+### Design
 
-## Implementation Logic
+### Implementation Logic
 
-## Limitations
+### Limitations
 
-# Getting Started
+## Getting Started
 
-## Prerequisites
+### Prerequisites
 
-## Installation
+### Installation
 
-# Usage
+## Usage
 
-# Acknowledgements 
+## Acknowledgements 
