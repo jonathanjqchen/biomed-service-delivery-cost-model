@@ -1,7 +1,7 @@
 <div id="top"></div>
 
 ## Table of Contents
-1. [Lower Mainland Biomedical Engineering Service Delivery Cost Model](#lower-mainland-biomedical-engineering-service-delivery-cost-model)
+1. [Background](#lower-mainland-biomedical-engineering-service-delivery-cost-model)
     1. [Research](#research)
     2. [Design](#design)
     3. [Implementation Logic](#implementation-logic)
@@ -12,7 +12,7 @@
 3. [Usage](#usage)
 4. [Acknowledgements](#acknowledgements)
 
-## Background
+## Lower Mainland Biomedical Engineering Service Delivery Cost Model
 Lower Mainland Biomedical Engineering (LMBME) is an initiative that oversees the maintenance, patient safety, education, procurement, budgeting, planning, projects, and design of medical technology across four of BC's largest health authorities—Providence Health Care, Fraser Health, Provincial Health Services, and Vancouver Coastal Health.  
 
 The method that LMBME has traditionally used for estimating the cost to support net new devices is a simple multiplication of an asset’s acquisition cost by the cost-of-service-ratio (COSR). The biomedical engineering standard for the COSR is 5%—this ratio tells us that the approximate annual cost to support an asset is 5% of the asset’s total acquisition cost. For example, an asset with an acquisition cost of $5000 would have an estimated support cost of 0.05 * $5000 = $250.
