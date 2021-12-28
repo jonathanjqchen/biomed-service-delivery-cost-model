@@ -2,16 +2,15 @@
 
 ## Table of Contents
 1. [Lower Mainland Biomedical Engineering Service Delivery Cost Model](#lower-mainland-biomedical-engineering-service-delivery-cost-model)
-        1. [Research](#research)
-        2. [Design](#design)
-        3. [Implementation Logic](#implementation-logic)
-        4. [Limitations](#limitations)
+    1. [Research](#research)
+    2. [Design](#design)
+    3. [Implementation Logic](#implementation-logic)
+    4. [Limitations](#limitations)
 2. [Getting Started](#getting-started)
-        1. [Prerequisites](#prerequisites)
-        2. [Installation](#installation)
+    1. [Prerequisites](#prerequisites)
+    2. [Installation](#installation)
 3. [Usage](#usage)
 4. [Acknowledgements](#acknowledgements)
-
 
 ## Background
 Lower Mainland Biomedical Engineering (LMBME) is an initiative that oversees the maintenance, patient safety, education, procurement, budgeting, planning, projects, and design of medical technology across four of BC's largest health authorities—Providence Health Care, Fraser Health, Provincial Health Services, and Vancouver Coastal Health.  
@@ -26,7 +25,7 @@ Each year, LMBME submits budgetary pressures based on the influx of net new devi
 
 Given the above issues with the COSR method of estimating service delivery costs, the goal of this project was to develop a data-driven cost model rooted in accounting principles that could systematically estimate asset support costs.
 
-<p align="right"><a href="#top">Back to top</a></p>
+<p align="right"><a href="#top">[Back to top]</a></p>
 
 ### Research
 
