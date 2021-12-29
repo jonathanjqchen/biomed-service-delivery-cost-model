@@ -37,6 +37,7 @@ Given the above issues with the COSR method of estimating service delivery costs
 Two research methods were used to obtain the necessary information to construct the cost model: literature reviews and stakeholder interviews.
 
 **Literature Reviews**
+
 The conclusion arrived at from reading through biomedical engineering journal articles is that there is no established method for
 estimating service delivery costs, aside from the COSR—with a 5% COSR being the standard. Variance from the 5% standard can be
 attributed to variables such as the presence of medical imaging and laboratory equipment (more expensive to support than clinical
@@ -57,6 +58,7 @@ version of TDABC and ABC: job-order costing. Job-order costing is one of the two
 widely used across all industries because it is not resource-intensive to implement.
 
 **Stakeholder Interviews**
+
 The goal of the stakeholder interviews was two-fold:
 1. Understand LMBME’s processes
 2. Identify pain points working with COSR method of budgeting and managing a strapped budget
@@ -67,32 +69,9 @@ After speaking with LMBME staff, business processes were categorized into severa
 
 Below is a selection of pain points that were raised during stakeholder interviews:
 
-| ID | Stakeholder | Pain Points | Requirement | Priority |
-|----|-------------|-------------|-------------|----------|
-| B1 | BMT | The scope of a tech's work is very broad and a lot of time and value added isn't captured | Capture value BMTs bring beyond what’s shown in WOs (e.g. training new hires, assisting clinical staff) | High |
-| B4 | BMT | Techs aren't receiving formal training at the same rate that devices are innovating and becoming more complex | Increase training budget because techs working on high-acuity equipment should be trained by OEM, not other techs | Med |
-| A1 | Admin | Dollar value of admin work isn't captured | Capture intangible value added of admin (e.g. triage calls, emails,
-requests to minimize a tech’s nondevice hours) | High |
-| D1 | DI | DI doesn’t deal with a lot of net new equipment, so increasing service costs may not be reflected in net new cost 
-pressures | N/A | Out of scope |
-| D4 | DI | DI tech apprenticeship training costs are covered by parts budget or training credits where possible | Budgeting for DI training costs | Med |
-| M1 | Management | Parts, staff, training for DI is a lot more expensive than for clinical | Account for higher DI equipment costs | Med |
-| M3 | Management | Service costs tend to increase with the age of devices | Data-driven approach to capturing the influence of age on ownership costs | Out of scope |
-| M5 | Management | No strict training requirements to maintain vast majority of devices, so the training threshold varies from
-site to site based on supervisor’s discretion | Section off a standardized training budget | Med |
-| M7 | Management | Not all sites are funded equally; certain sites work with very tight budgets and struggle to free up labour to
-do more work | Model should output a budget that elevates existing budget for sites that are strapped for money | High |
-| M8 | Management | Not all sites have FTE techs working there every day; a tech from nearby hospital needs to travel there on 
-rotation to perform maintenance activities and provide on-demand service as needed | Account for travel, accommodation, and time 
-costs for these travelling techs | High |
-| T1 | Training Coordinator | Training “budget” is handled differently by each HA—no standardization. Many techs feel like they 
-aren’t adequately trained to perform some of their duties | Budget for at least 2 people trained on a critical device per site | Out of scope |
-| T1 | Training Coordinator | Training needs on devices are recurring due to factors such as relocation, retirement, career
-change, recertification requirements, large new equipment purchases, etc. | Account for the need to train up to 3-4 techs on a 
-device over the course of its useful life | Out of scope |
-| T1 | Training Coordinator | Sometimes techs feel like they don’t have formal training in skills that are necessary to do their
-work, but aren’t directly related to maintaining devices (e.g. computer skills, networking skills, etc.) | Nice-to-have: 
-Additional budget for an annual stipend for continuing education for techs | Out of scope |
+![image](https://user-images.githubusercontent.com/54252001/147628717-67acdf8c-ac3f-4047-8b03-57998d15e0df.png)
+
+<p align="right"><a href="#top">[Back to top]</a></p>
 
 ### Design
 
