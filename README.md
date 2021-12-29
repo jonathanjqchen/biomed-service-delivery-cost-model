@@ -190,7 +190,7 @@ to take advantage of libraries such as [pandas](https://pandas.pydata.org/) for 
 ### Control Flow Diagram
 ![control_flow](https://user-images.githubusercontent.com/54252001/147695091-4a303724-0201-4a6a-be4a-29c2ee3f1243.jpg)
 
-For more implementation details and discussion on cost model limitations, [see the project report]().
+For more implementation details and discussion on cost model limitations, [see the cost model project report](https://github.com/jonathanjqchen/biomed-service-delivery-cost-model/releases/tag/v1.0.0).
 
 <p align="right"><a href="#top">[Back to top]</a></p>
 
