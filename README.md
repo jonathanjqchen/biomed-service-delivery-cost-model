@@ -59,7 +59,7 @@ widely used across all industries because it is not resource-intensive to implem
 
 **Stakeholder Interviews**
 
-The goal of the stakeholder interviews was two-fold:
+The goal of the stakeholder interviews was twofold:
 1. Understand LMBME’s processes
 2. Identify pain points working with COSR method of budgeting and managing a strapped budget
 
@@ -74,6 +74,79 @@ Below is a selection of pain points that were raised during stakeholder intervie
 <p align="right"><a href="#top">[Back to top]</a></p>
 
 ### Design
+The design of the cost model was informed by the literature reviews and stakeholder interviews outlined above. Below is a diagram 
+that illustrates how job-order costing was implemented for this cost model. 
+
+![image](https://user-images.githubusercontent.com/54252001/147629012-fb5a61d7-80cf-4da1-a4c8-0c687222c6a7.png)
+
+The goal of job-order costing is to determine how much money it costs to produce a product or service based on the direct and 
+indirect (i.e. overhead) costs associated with that product or service. Direct costs are any costs that can be explicitly traced 
+back to a single unit of a product or service. Indirect or overhead costs are any costs that need to be incurred in order to 
+produce a product or service, but cannot be explicitly linked to a single unit of the product or service. In the case of LMBME, 
+the “service” offered is the support and management of medical devices.
+
+**Direct Costs**
+
+Work orders (i.e. preventative maintenance, corrective work, risk management, incoming inspection, etc.) are direct costs since techs work directly on repairing and inspecting devices. This is work that can be explicitly traced back to a single asset because we can use TMS data to determine the number of support hours, and hence the service cost for any given device. Given this logic, parts and service contracts should also technically be direct costs. However, the design of this cost model lumps parts and service contract costs into overhead. The reason for this is threefold:
+
+1. TMS parts cost data is not accurate
+2. Service contract costs are not included as a field in TMS
+3. Parts and service contract costs are inconsistently charged to different accounts in the Statements of Operations, making them difficult and cumbersome to separate from the indirect costs
+
+Direct costs take care of the “Maintenance and risk management” and “End of life” business processes from the “Research” section 
+since those processes are all encompassed in work orders. 
+
+**Indirect Costs**
+
+Whereas direct costs are determined on an asset basis, indirect costs are determined on a cost centre basis. There are three main 
+pools of indirect costs: 
+
+*Tech labour costs*
+
+1. Based on anecdotal evidence from stakeholder interviews with LMBME technologists, ~35% of a technologist’s work was determined 
+to be non-device related (i.e. time spent in meetings, speaking with clinical staff, offering input on asset procurement, 
+etc.). Hence, 35% of the total tech labour cost for a cost centre is added to the cost centre overhead.
+2. Indirect tech labour costs account for some of the costs in the “Planning and procurement” (i.e. purchasing) and “Training” 
+(i.e. in-house education to clinical staff) business processes.
+
+*Non-tech labour costs*
+
+1. Non-tech staff include all LMBME staff with regional responsibilities (i.e. they oversee multiple cost centres).
+2. Since non-tech LMBME staff do not work directly with devices, all of the total compensation for non-tech staff gets distributed 
+as overhead to the costs centres at which the non-tech staff have oversight. Non-tech labour costs account for a wide variety
+of miscellaneous indirect costs that otherwise would not be accounted for. 
+
+*Non-labour costs*
+1. Non-labour overhead costs are all the remaining costs on the Statement of Operations for a cost centre after removing labour 
+costs and direct costs.
+2. A lot of the miscellaneous costs such as training (sundry) and operational supplies (supplies) are accounted for here.
+
+**POHR**
+
+Recall that the indirect (i.e. overhead) costs outlined in the section above were identified on a cost centre basis. However, we 
+need to determine the overhead cost per asset. To do this, we need to compute a pre-determined overhead rate (POHR). This is the 
+estimated amount of overhead cost that should be applied to a single asset based on some cost driver. The cost driver used by this 
+cost model is the number of tech labour hours—this not only logically makes sense, but labour hours is generally the standard cost
+driver used in most implementations of job-order costing. What a cost driver of tech labour hours says is that we expect the 
+amount of overhead incurred by a cost centre to increase if the number of tech labour hours increases. This makes sense—consider 
+the possible scenarios:
+1. Tech labour costs: This overhead cost pool will obviously increase—tech labour costs increase proportionally with the number of tech labour hours.
+2. Non-tech labour costs: This overhead cost pool may or may not increase—at worse it will stay constant as the number of tech 
+labour hours increases. If many new techs are hired in a region, maybe a new regional manager will be hired. In this case, non-
+tech labour costs would increase with the number of tech labour hours.
+3. Non-labour costs: This overhead cost pool will likely increase proportionally with tech labour hours. If we hire an additional 
+tech at a cost centre, the cost of training, miscellaneous supplies, etc. will likely increase as well.
+
+Hence, to compute the POHR for any given cost centre, the cost model uses the formula:
+POHR = (Tech labour costs + Non-tech labour costs + Non-labour costs) / Total tech labour hours in a year 
+
+**Total Cost to Service an Asset**
+Finally, to determine the cost to service Asset X, the cost model uses the following formula: 
+
+Cost to service = (POHR * WO Hours for Asset X) + (Tech Hourly Wage * WO Hours for Asset X) 
+
+In the formula above, WO hours is the average annual number of WO hours spent supporting the asset and tech hourly wage is the 
+weighted average wage for all the techs working at the cost centre where the asset is located. 
 
 ### Implementation Logic
 
