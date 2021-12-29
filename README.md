@@ -65,11 +65,11 @@ The goal of the stakeholder interviews was twofold:
 
 After speaking with LMBME staff, business processes were categorized into several overarching pools:
 
-![image](https://user-images.githubusercontent.com/54252001/147626748-ab9f2f77-a766-40b4-86bd-29e6f0a01a98.png)
+![business_processes](https://user-images.githubusercontent.com/54252001/147626748-ab9f2f77-a766-40b4-86bd-29e6f0a01a98.png)
 
 Below is a selection of pain points that were raised during stakeholder interviews:
 
-![image](https://user-images.githubusercontent.com/54252001/147628717-67acdf8c-ac3f-4047-8b03-57998d15e0df.png)
+![stakeholder_pain_points](https://user-images.githubusercontent.com/54252001/147628717-67acdf8c-ac3f-4047-8b03-57998d15e0df.png)
 
 <p align="right"><a href="#top">[Back to top]</a></p>
 
@@ -77,8 +77,7 @@ Below is a selection of pain points that were raised during stakeholder intervie
 The design of the cost model was informed by the literature reviews and stakeholder interviews outlined above. Below is a diagram 
 that illustrates how job-order costing was implemented for this cost model. 
 
-![image](https://user-images.githubusercontent.com/54252001/147629012-fb5a61d7-80cf-4da1-a4c8-0c687222c6a7.png)
-![image](https://user-images.githubusercontent.com/54252001/147630866-63b42a3e-fbd9-4a3b-9b55-c453e462403a.png)
+![job_order_costing](https://user-images.githubusercontent.com/54252001/147630976-7be00510-34f8-4d9f-8d28-4b12ceadd452.jpg)
 
 The goal of job-order costing is to determine how much money it costs to produce a product or service based on the direct and 
 indirect (i.e. overhead) costs associated with that product or service. Direct costs are any costs that can be explicitly traced 
