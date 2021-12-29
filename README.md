@@ -57,6 +57,8 @@ However, given the scope and the time constraints on this project, the decision 
 version of TDABC and ABC: job-order costing. Job-order costing is one of the two types of traditional costing methods and is
 widely used across all industries because it is not resource-intensive to implement.
 
+<p align="right"><a href="#top">[Back to top]</a></p>
+
 **Stakeholder Interviews**
 
 The goal of the stakeholder interviews was twofold:
@@ -85,6 +87,8 @@ back to a single unit of a product or service. Indirect or overhead costs are an
 produce a product or service, but cannot be explicitly linked to a single unit of the product or service. In the case of LMBME, 
 the “service” offered is the support and management of medical devices.
 
+<p align="right"><a href="#top">[Back to top]</a></p>
+
 **Direct Costs**
 
 Work orders (i.e. preventative maintenance, corrective work, risk management, incoming inspection, etc.) are direct costs since techs work directly on repairing and inspecting devices. This is work that can be explicitly traced back to a single asset because we can use TMS data to determine the number of support hours, and hence the service cost for any given device. Given this logic, parts and service contracts should also technically be direct costs. However, the design of this cost model lumps parts and service contract costs into overhead. The reason for this is threefold:
@@ -95,6 +99,8 @@ Work orders (i.e. preventative maintenance, corrective work, risk management, in
 
 Direct costs take care of the “Maintenance and risk management” and “End of life” business processes from the “Research” section 
 since those processes are all encompassed in work orders. 
+
+<p align="right"><a href="#top">[Back to top]</a></p>
 
 **Indirect Costs**
 
@@ -121,6 +127,8 @@ of miscellaneous indirect costs that otherwise would not be accounted for.
 costs and direct costs.
 2. A lot of the miscellaneous costs such as training (sundry) and operational supplies (supplies) are accounted for here.
 
+<p align="right"><a href="#top">[Back to top]</a></p>
+
 **POHR**
 
 Recall that the indirect (i.e. overhead) costs outlined in the section above were identified on a cost centre basis. However, we 
@@ -141,6 +149,8 @@ Hence, to compute the POHR for any given cost centre, the cost model uses the fo
 
 `POHR = (Tech labour costs + Non-tech labour costs + Non-labour costs) / Total tech labour hours in a year`
 
+<p align="right"><a href="#top">[Back to top]</a></p>
+
 **Total Cost to Service an Asset**
 
 Finally, to determine the cost to service Asset X, the cost model uses the following formula: 
@@ -150,13 +160,15 @@ Finally, to determine the cost to service Asset X, the cost model uses the follo
 In the formula above, WO hours is the average annual number of WO hours spent supporting the asset and tech hourly wage is the 
 weighted average wage for all the techs working at the cost centre where the asset is located. 
 
+<p align="right"><a href="#top">[Back to top]</a></p>
+
 ### Implementation Logic
 
 ### Limitations
 
 ## Getting Started
 
-### Prerequisites
+### Prerequesites
 
 ### Installation
 
