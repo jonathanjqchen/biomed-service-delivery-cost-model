@@ -196,7 +196,7 @@ For more implementation details and discussion on cost model limitations, [see t
 
 ## Getting Started
 
-### Prerequesites
+### Prerequisites
 
 ### Installation
 
