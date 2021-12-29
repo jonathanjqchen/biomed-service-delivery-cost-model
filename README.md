@@ -67,10 +67,9 @@ After speaking with LMBME staff, business processes were categorized into severa
 
 Below is a selection of pain points that were raised during stakeholder interviews:
 
-| ID | Stakeholder | Pain Points | User Requirements | Priority |
-|----|-------------|-------------|-------------------|----------|
-|B1  |BMT          | The scope of a tech's work is very broad and a lot of time and value added isn't captured | Capture value
-BMTs bring beyond what’s shown in WOs (e.g. training new hires, assisting clinical staff) | High | 
+| ID | Stakeholder | Pain Points | Requirement | Priority |
+|----|-------------|-------------|-------------|----------|
+| B1 | BMT         | The scope of a tech's work is very broad and a lot of time and value added isn't captured | Capture value BMTs bring beyond what’s shown in WOs (e.g. training new hires, assisting clinical staff) | High |
 
 ### Design
 
