@@ -4,8 +4,7 @@
 1. [Background](#background)
     1. [Research](#research)
     2. [Design](#design)
-    3. [Implementation Logic](#implementation)
-    4. [Limitations](#limitations)
+    3. [Implementation and Limitations](#implementation-and-limitations)
 2. [Getting Started](#getting-started)
     1. [Prerequisites](#prerequisites)
     2. [Installation](#installation)
@@ -179,20 +178,21 @@ weighted average wage for all the techs working at the cost centre where the ass
 
 <p align="right"><a href="#top">[Back to top]</a></p>
 
-### Implementation
+### Implementation and Limitations
 Since LMBME was in the process of looking for a new relational database and because this cost model would not need to make 
 frequent requests for data, the cost model was not integrated with TMS. Instead, the cost model takes .xlsx exports as inputs. For 
 this reason and because LMBME wanted a final output from the cost model to be in Excel, the cost model was developed using Python 
-to take advantage of libraries such as pandas for data manipulation and XlsxWriter for working with Excel files.
+to take advantage of libraries such as [pandas](https://pandas.pydata.org/) for data manipulation and [XlsxWriter](https://xlsxwriter.readthedocs.io/) for working with Excel files.
 
-![image](https://user-images.githubusercontent.com/54252001/147694046-4ebf0efa-39e6-4e93-8833-3d87435a7d55.png)
-![image](https://user-images.githubusercontent.com/54252001/147694053-60ec2b15-ad84-4653-9e14-f9fcf167ba0b.png)
+## UML Class Diagram
+![uml](https://user-images.githubusercontent.com/54252001/147695014-fffdeedd-78d6-4764-be43-6df70ce4364d.jpg)
 
-![image](https://user-images.githubusercontent.com/54252001/147694021-1ea8b303-440c-4c0a-9bd1-a35f1a3c1b45.png)
-![image](https://user-images.githubusercontent.com/54252001/147694030-570438b3-859a-4794-8236-57764b569ebd.png)
+## Control Flow Diagram
+![control_flow](https://user-images.githubusercontent.com/54252001/147695091-4a303724-0201-4a6a-be4a-29c2ee3f1243.jpg)
 
+For more implementation details and discussion on cost model limitations, [see the project report]().
 
-### Limitations
+<p align="right"><a href="#top">[Back to top]</a></p>
 
 ## Getting Started
 
