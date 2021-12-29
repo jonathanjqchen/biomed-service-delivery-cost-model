@@ -78,6 +78,7 @@ The design of the cost model was informed by the literature reviews and stakehol
 that illustrates how job-order costing was implemented for this cost model. 
 
 ![image](https://user-images.githubusercontent.com/54252001/147629012-fb5a61d7-80cf-4da1-a4c8-0c687222c6a7.png)
+![image](https://user-images.githubusercontent.com/54252001/147630866-63b42a3e-fbd9-4a3b-9b55-c453e462403a.png)
 
 The goal of job-order costing is to determine how much money it costs to produce a product or service based on the direct and 
 indirect (i.e. overhead) costs associated with that product or service. Direct costs are any costs that can be explicitly traced 
