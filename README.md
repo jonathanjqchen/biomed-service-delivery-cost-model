@@ -138,12 +138,14 @@ tech labour costs would increase with the number of tech labour hours.
 tech at a cost centre, the cost of training, miscellaneous supplies, etc. will likely increase as well.
 
 Hence, to compute the POHR for any given cost centre, the cost model uses the formula:
-POHR = (Tech labour costs + Non-tech labour costs + Non-labour costs) / Total tech labour hours in a year 
+
+`POHR = (Tech labour costs + Non-tech labour costs + Non-labour costs) / Total tech labour hours in a year`
 
 **Total Cost to Service an Asset**
+
 Finally, to determine the cost to service Asset X, the cost model uses the following formula: 
 
-Cost to service = (POHR * WO Hours for Asset X) + (Tech Hourly Wage * WO Hours for Asset X) 
+`Cost to service = (POHR * WO Hours for Asset X) + (Tech Hourly Wage * WO Hours for Asset X)`
 
 In the formula above, WO hours is the average annual number of WO hours spent supporting the asset and tech hourly wage is the 
 weighted average wage for all the techs working at the cost centre where the asset is located. 
