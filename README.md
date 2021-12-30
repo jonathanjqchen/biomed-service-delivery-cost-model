@@ -5,7 +5,7 @@
     1. [Research](#research)
     2. [Design](#design)
     3. [Implementation and Limitations](#implementation-and-limitations)
-2. [Usage](#usage)
+2. [Getting Started](#getting-started)
 4. [Acknowledgements](#acknowledgements)
 
 ## Background
