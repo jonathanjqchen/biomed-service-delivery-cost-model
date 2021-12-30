@@ -188,7 +188,9 @@ $ pip install XlsxWriter
 ```
 
 2. Clone the repo
-`$ git clone https://github.com/jonathanjqchen/biomed-service-delivery-cost-model.git`
+```
+$ git clone https://github.com/jonathanjqchen/biomed-service-delivery-cost-model.git
+```
 
 3. Fill out `./model_inputs/budget_report_input.xlsx` with info about assets for which you want to budget. You can use this script here to help generate the necessary inputs.
 
@@ -207,8 +209,11 @@ cost breakdowns for each of the cost centres:
 
 ![image](https://user-images.githubusercontent.com/54252001/147714073-5416e029-6ccd-4956-94d5-0d00e80a6c57.png) 
 
-For more detailed usage instructions and troubleshooting, see [`README.pdf`](https://github.com/jonathanjqchen/biomed-service-delivery-cost-model/releases/tag/v1.0.0) on the releases page.
+For more detailed usage instructions and troubleshooting, see [`README.pdf`](https://github.com/jonathanjqchen/biomed-service-delivery-cost-model/releases/tag/v1.0.0) on the 
+releases page.
  
 <p align="right"><a href="#top">[Back to top]</a></p>
 
 ## Acknowledgements 
+Special thanks to Brendan Gribbons (Regional Engineering Team Manager, LMBME), Vaun Malo (Director, LMBME), and the rest of the LMBME team for their support and guidance 
+throughout this project. 
