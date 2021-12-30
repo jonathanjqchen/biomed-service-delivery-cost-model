@@ -5,10 +5,7 @@
     1. [Research](#research)
     2. [Design](#design)
     3. [Implementation and Limitations](#implementation-and-limitations)
-2. [Getting Started](#getting-started)
-    1. [Prerequisites](#prerequisites)
-    2. [Installation](#installation)
-3. [Usage](#usage)
+2. [Usage](#usage)
 4. [Acknowledgements](#acknowledgements)
 
 ## Background
@@ -202,20 +199,25 @@ To set up and use this project locally...
 $ pip install pandas
 $ pip install XlsxWriter
 ```
+
 2. Clone the repo
 `$ git clone https://github.com/jonathanjqchen/biomed-service-delivery-cost-model.git`
+
 3. Fill out `./model_inputs/budget_report_input.xlsx` with info about assets for which you want to budget. You can use this script here to help generate the necessary inputs.
+
 ![image](https://user-images.githubusercontent.com/54252001/147713881-4386063b-5908-4727-9e36-b1d8538be1d1.png)
+
 4. Run main.py 
 ```
 $ cd biomed-service-delivery-cost-model
 $ python main.py
 ```
-5. Output will be in `./model_outputs/budget_report_output.xlsx`. There will be one worksheet that summarizes the costs for all cost centres, and one worksheet for each of the cost centres:
+
+5. Output will be in `./model_outputs/budget_report_output.xlsx`. There will be one worksheet that summarizes the costs for all cost centres, and one worksheet for each of the 
+cost centres:
 
 ![image](https://user-images.githubusercontent.com/54252001/147714096-61834efe-0d3c-4d8b-a7c7-20958c599faf.png)
 
-![image](https://user-images.githubusercontent.com/54252001/147714073-5416e029-6ccd-4956-94d5-0d00e80a6c57.png)
-  
+![image](https://user-images.githubusercontent.com/54252001/147714073-5416e029-6ccd-4956-94d5-0d00e80a6c57.png)  
 
 ## Acknowledgements 
