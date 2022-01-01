@@ -192,7 +192,7 @@ $ pip install XlsxWriter
 $ git clone https://github.com/jonathanjqchen/biomed-service-delivery-cost-model.git
 ```
 
-3. Fill out `./model_inputs/budget_report_input.xlsx` with info about assets for which you want to budget. You can use this script here to help generate the necessary inputs.
+3. Fill out `./model_inputs/budget_report_input.xlsx` with info about assets for which you want to budget. You can use [this script here to help generate the necessary inputs](https://github.com/jonathanjqchen/biomed-net-new-assets-script).
 
 ![image](https://user-images.githubusercontent.com/54252001/147713881-4386063b-5908-4727-9e36-b1d8538be1d1.png)
 
