@@ -164,8 +164,7 @@ the cost centre where the asset is located.
 ## Implementation and Limitations
 Since LMBME was in the process of looking for a new relational database and because this cost model would not need to make frequent requests for data, the cost model was not 
 integrated with TMS. Instead, the cost model takes .xlsx exports as inputs. For this reason and because LMBME wanted a final output from the cost model to be in Excel, the cost 
-model was developed using Python to take advantage of libraries such as [pandas](https://pandas.pydata.org/) for data manipulation and [XlsxWriter]
-(https://xlsxwriter.readthedocs.io/) for working with Excel files.
+model was developed using Python to take advantage of libraries such as [pandas](https://pandas.pydata.org/) for data manipulation and [XlsxWriter](https://xlsxwriter.readthedocs.io/) for working with Excel files.
 
 ### UML Class Diagram
 ![uml](https://user-images.githubusercontent.com/54252001/147695014-fffdeedd-78d6-4764-be43-6df70ce4364d.jpg)
