@@ -96,8 +96,7 @@ costs into overhead. The reason for this is threefold:
 3. Parts and service contract costs are inconsistently charged to different accounts in the Statements of Operations, making them difficult and cumbersome to separate from the 
 indirect costs
 
-Direct costs take care of the “Maintenance and risk management” and “End of life” business processes from the “Research” section since those processes are all encompassed in  
-work orders. 
+Direct costs take care of the “Maintenance and risk management” and “End of life” business processes from the “Research” section since those processes are all encompassed in work orders. 
 
 <p align="right"><a href="#top">[Back to top]</a></p>
 
