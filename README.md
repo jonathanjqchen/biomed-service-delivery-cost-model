@@ -171,8 +171,7 @@ model was developed using Python to take advantage of libraries such as [pandas]
 ### Control Flow Diagram
 ![control_flow](https://user-images.githubusercontent.com/54252001/147695091-4a303724-0201-4a6a-be4a-29c2ee3f1243.jpg)
 
-For more implementation details and discussion on cost model limitations, [see LMBME.Service.Delivery.Cost.Model.Report.pdf](https://github.com/jonathanjqchen/biomed-service-
-delivery-cost-model/releases/tag/v1.0.0) on the releases page.
+For more implementation details and discussion on cost model limitations, [see LMBME.Service.Delivery.Cost.Model.Report.pdf](https://github.com/jonathanjqchen/biomed-service-delivery-cost-model/releases/tag/v1.0.0) on the releases page.
 
 <p align="right"><a href="#top">[Back to top]</a></p>
 
